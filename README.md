@@ -136,12 +136,35 @@ This outputs a public URL: `https://<tunnel-id>.tinyfi.sh`.
 
 ---
 
-### 3. Cursor
+### Cursor Setup
 
-In Cursor **Settings -> Features -> MCP -> Add New MCP Server**:
-- **Type**: `command`
-- **Command**: `python -m src.server --transport stdio --skill-root "/path/to/skills"`
-- **Working Directory**: `/path/to/Skills_MCP_Server`
+1. Clone this repository, create `.venv`, and install the project dependencies as shown in [Prerequisites](#prerequisites). Use Python 3.11 or later for this configuration and the dependencies declared in `pyproject.toml`, including MCP SDK 2.2.0 or later.
+2. Create `.cursor/mcp.json` in the project opened in Cursor, or use `~/.cursor/mcp.json` for a global configuration. If the file already exists, merge the `skills` entry into its existing `mcpServers` object:
+
+```json
+{
+  "mcpServers": {
+    "skills": {
+      "type": "stdio",
+      "command": "/path/to/Skills_MCP_Server/.venv/bin/python",
+      "args": [
+        "-P", "-m", "src.server",
+        "--transport", "stdio",
+        "--skill-root", "/path/to/skills"
+      ],
+      "env": {
+        "PYTHONPATH": "/path/to/Skills_MCP_Server",
+        "PROFILE_DIR": "/path/to/Skills_MCP_Server/profiles"
+      }
+    }
+  }
+}
+```
+
+3. Replace every `/path/to` value with an absolute path. On Windows, use the virtual environment's `.venv/Scripts/python.exe` and write paths with forward slashes or escaped backslashes (`\\`). `PYTHONPATH` locates the repository's `src.server` module, and `-P` prevents another project's `src` package from taking precedence. `PROFILE_DIR` locates the profiles even when Cursor opens a different project.
+4. Save the file and restart Cursor. Enable `skills` from **Customize** and check **Available Tools** in the Agent/composer for `list_skills`, `search_skills`, and `get_skill`. Ask *"Use list_skills to list my available skills"* and inspect the tool response to verify the connection.
+
+See the [official Cursor MCP documentation](https://cursor.com/docs/mcp) for configuration details.
 
 ---
 
